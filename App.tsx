@@ -1,118 +1,131 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+// In App.js in a new project
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import Entypo from 'react-native-vector-icons/Entypo'
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState } from './store';
+import { Provider } from 'react-redux'
+import store from './store'
+import HomeScreen from './pages/HomeScreen'
+import PublishScreen from './pages/PublishScreen'
+import AccountScreen from './pages/AccountScreen'
+import LoginScreen from './pages/LoginScreen'
+import VideoScreen from './pages/VideoScreen'
+import MessageScreen from './pages/MessageScreen'
+import InviteScreen from './pages/InviteScreen';
+import ModifyInfoScreen from './pages/ModifyInfoScreen';
+import { View } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const Tab = createMaterialBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function UserInfoScreen() {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+    <View>用户信息</View>
+  )
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function PropertyScreen() {
+  return (
+    <View>我的收益</View>
+  )
+}
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+const config = {
+  animation: 'spring',
+  config: {
+    stiffness: 1000,
+    damping: 500,
+    mass: 3,
+    overshootClamping: true,
+    restDisplacementThreshold: 0.01,
+    restSpeedThreshold: 0.01,
+  },
+};
+
+function HomeTabs() {
+
+  const unreadNumber = useSelector((state: RootState) => state.baseInfo.unreadNumber);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <Tab.Navigator
+      initialRouteName="Home"
+      activeColor="#F14B8B"
+      inactiveColor="#8F8F90"
+      activeIndicatorStyle={{ backgroundColor: 'rgba(0,0,0,0)' }}
+      barStyle={{ backgroundColor: '#202123' }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: '首页',
+          tabBarIcon: ({ color }) => (
+            <Entypo name="home" color={color} size={24} />
+          ),
+        }}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <Tab.Screen
+        name="Publish"
+        component={PublishScreen}
+        options={{
+          tabBarLabel: '发布',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="send" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Message"
+        component={MessageScreen}
+        options={{
+          tabBarLabel: '消息',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="message-text" color={color} size={24} />
+          ),
+          tabBarBadge: unreadNumber <= 0 ? false : unreadNumber,
+        }} />
+      <Tab.Screen
+        name="Me"
+        component={AccountScreen}
+        options={{
+          tabBarLabel: '我的',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="user-alt" color={color} size={24} />
+          ),
+        }} />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+function App() {
+  return (
+    <Provider store={store}>
+      <SafeAreaProvider style={{
+        backgroundColor: '#000000'
+      }}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="HomeTab" component={HomeTabs} options={{ headerShown: false }} />
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Video" component={VideoScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="UserInfo" component={UserInfoScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Property" component={PropertyScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Invite" component={InviteScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ModifyInfo" component={ModifyInfoScreen} options={{ headerShown: false }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </Provider>
+  );
+}
 
 export default App;
