@@ -198,7 +198,7 @@ const HomeScreen = ({ navigation, route }: any) => {
   }
 
   const gotoPay = (channel: any) => {
-    fetch('https://taohua10.cn/api/pay-service/alipay/pay', {
+    fetch('https://taohua10.cn/api/pay-service/alipay/trade-precreate', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -206,9 +206,13 @@ const HomeScreen = ({ navigation, route }: any) => {
         'token': token
       },
       body: `orderId=${orderId}&payChannel=${channel}`
-    }).then(res => res.json())
+    }).then(res => {
+      // console.log(res)
+      return res.blob()
+    })
       .then((res: any) => {
-        res.code == 0 && aliPay(res.data)
+        // res.code == 0 && aliPay(res.data)
+        console.log(res)
       })
   }
 
