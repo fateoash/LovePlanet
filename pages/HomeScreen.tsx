@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Pressable, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, FlatList, Dimensions, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
@@ -208,11 +208,19 @@ const HomeScreen = ({ navigation, route }: any) => {
       body: `orderId=${orderId}&payChannel=${channel}`
     }).then(res => {
       // console.log(res)
-      return res.blob()
+      return res.json()
     })
       .then((res: any) => {
         // res.code == 0 && aliPay(res.data)
-        console.log(res)
+        if (res.code == 0) {
+          Linking.canOpenURL(res.data).then(supported => {
+            if (supported) {
+              Linking.openURL(res.data);
+            } else {
+              console.log('无法打开链接: ' + res.data);
+            }
+          });
+        }
       })
   }
 

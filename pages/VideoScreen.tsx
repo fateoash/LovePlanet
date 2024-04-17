@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { RootState } from '../store';
@@ -31,6 +31,14 @@ const VideoPage: React.FC<VideoPageProps> = ({ route, navigation }) => {
     setPageIndex(index);
   }, []);
 
+  useEffect(() => {
+    if (pageIndex) {
+      if (videoList[pageIndex] && (videoList[pageIndex] as any).status == 4) {
+        setPayModalVisible(true);
+      }
+    }
+  }, [pageIndex]);
+
   const fetchVideoStream = async (params: {
     afterIndex?: number;
     length?: number;
@@ -53,13 +61,20 @@ const VideoPage: React.FC<VideoPageProps> = ({ route, navigation }) => {
       {pageIndex > -1 && <PagingList
         query={fetchVideoStream}
         currentIndex={pageIndex}
-        renderItem={({ item, index }) => {
+        renderItem={({ item, index }: { item: any, index: number }) => {
+          // console.log(item)
           return (
-            <VideoSocials
+            item.status != 4 ? <VideoSocials
               data={item}
               currentIndex={pageIndex}
               index={index}
-            />
+            /> : <Image blurRadius={5}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+              source={{ uri: item.coverPath }}></Image>
           );
         }}
         onPageIndexChanged={(index) => {
@@ -76,9 +91,9 @@ const VideoPage: React.FC<VideoPageProps> = ({ route, navigation }) => {
         top: 16,
         left: 16
       }}
-      onPress={()=>{
-        navigation.goBack()
-      }}>
+        onPress={() => {
+          navigation.goBack()
+        }}>
         <MaterialCommunityIcons name="chevron-left" color={'rgba(255,255,255,0.5)'} size={24} />
       </Pressable>
     </View>
