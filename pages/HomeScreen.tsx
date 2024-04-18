@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Pressable, FlatList, Dimensions, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, FlatList, Dimensions, Linking, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
@@ -33,12 +33,27 @@ const HomeScreen = ({ navigation, route }: any) => {
   const [payModalVisible, setPayModalVisible] = useState(false);
   const [token, setToken] = useState('');
   const [orderId, setOrderId] = useState('');
+  const [videoId, setVideoId] = useState('');
   const isFocused = useIsFocused();
   let timer = useRef<NodeJS.Timeout>();
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     initToken();
-    return () => clearInterval(timer.current);
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        fetchVideoList()
+        console.log('App has come to the foreground!');
+      }
+      appState.current = nextAppState;
+    });
+    return () => {
+      clearInterval(timer.current);
+      subscription.remove();
+    }
   }, [])
 
   useEffect(() => {
@@ -168,6 +183,8 @@ const HomeScreen = ({ navigation, route }: any) => {
 
   const onVideoClick = (item: any) => {
     if (item && item.status == 4) {
+      console.log(item)
+      setVideoId(item.id)
       setPayModalVisible(true);
     } else {
       navigation.navigate('Video', { item })
@@ -182,7 +199,7 @@ const HomeScreen = ({ navigation, route }: any) => {
         'Content-Type': 'application/x-www-form-urlencoded',
         'token': token
       },
-      body: `memberPayId=${id}`
+      body: `memberPayId=${id}&videoId=${videoId}`
     }).then(res => res.json())
       .then((res: any) => {
         if (res.code == 0) {
@@ -302,8 +319,9 @@ const HomeScreen = ({ navigation, route }: any) => {
                 />
                 <Text style={styles.emptyText}>该博主暂未发表视频</Text>
               </>}
-              {videoList.length > 0 && <MasonryList
+              {videoList.length > 0 && <FlatList
                 contentContainerStyle={{ backgroundColor: 'rgba(0,0,0,0)' }}
+                columnWrapperStyle={{justifyContent: 'space-between'}}
                 data={videoList}
                 keyExtractor={(item): string => item.id}
                 numColumns={3}

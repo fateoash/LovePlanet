@@ -27,12 +27,12 @@ export const VideoSocials: React.FC<VideoSocialsProps> = (props) => {
         currentIndex={currentIndex}
         index={index}
       />
-      <View
+      {/* <View
         style={styles.join}
       >
         <Image style={{ width: 30, height: 30 }} source={require('../assets/images/join.png')} ></Image>
         <Text style={styles.joinText}>加入该博主粉丝团，解锁博主全部视频</Text>
-      </View>
+      </View> */}
       <View
         style={styles.cyberstar}
       >
